@@ -5,176 +5,206 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Inventory Admin</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Bootstrap 5: requisito visual del proyecto -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
 
+  <!-- Estilos propios para personalizar Bootstrap -->
   <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
-  <header class="hero"></header>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="#">
+        <i class="bi bi-box-seam me-2"></i> Inventory Admin
+      </a>
+      <span class="badge text-bg-light text-primary">Spring Boot + PostgreSQL</span>
+    </div>
+  </nav>
 
-  <main class="container">
-
-    <section class="grid summary-grid">
-      <article class="summary-card">
-        <span class="summary-icon">01</span>
-        <div>
-          <h3>Categorías</h3>
-          <p>Organiza tus productos.</p>
+  <header class="hero text-white">
+    <div class="container py-5">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-8">
+          <p class="text-uppercase fw-bold small mb-2 text-info">Sistema de inventario</p>
+          <h1 class="display-5 fw-bold mb-3">Gestiona categorías, proveedores y productos</h1>
+          <p class="lead mb-0">Frontend con Bootstrap conectado a una API REST desplegada en Render.</p>
         </div>
-      </article>
-
-      <article class="summary-card">
-        <span class="summary-icon">02</span>
-        <div>
-          <h3>Proveedores</h3>
-          <p>Centraliza tus contactos.</p>
-        </div>
-      </article>
-
-      <article class="summary-card">
-        <span class="summary-icon">03</span>
-        <div>
-          <h3>Productos</h3>
-          <p>Controla precio y stock base.</p>
-        </div>
-      </article>
-    </section>
-
-    <section class="grid management-grid">
-
-      <article class="card compact-card">
-        <div class="card-heading">
-          <span class="card-icon">C</span>
-          <div>
-            <p class="label">Módulo</p>
-            <h2>Categorías</h2>
+        <div class="col-lg-4">
+          <div class="glass-card p-4 rounded-4">
+            <h5 class="fw-bold mb-2"><i class="bi bi-cloud-check me-2"></i> API conectada</h5>
+            <p class="mb-0 small">Los datos se guardan en PostgreSQL usando el backend con Liquibase.</p>
           </div>
         </div>
+      </div>
+    </div>
+  </header>
 
-        <form id="categoryForm">
-          <label for="categoryName">Nombre de categoría</label>
-
-          <div class="field-group">
-            <div class="input-box">
-              <input id="categoryName" type="text" placeholder="Ej: Tecnología" />
+  <main class="container main-content">
+    <section class="row g-4 mb-4">
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm stat-card h-100">
+          <div class="card-body d-flex align-items-center gap-3">
+            <span class="stat-icon bg-primary-subtle text-primary"><i class="bi bi-tags"></i></span>
+            <div>
+              <h5 class="mb-1 fw-bold">Categorías</h5>
+              <p class="text-secondary mb-0 small">Clasifica productos.</p>
             </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm stat-card h-100">
+          <div class="card-body d-flex align-items-center gap-3">
+            <span class="stat-icon bg-success-subtle text-success"><i class="bi bi-truck"></i></span>
+            <div>
+              <h5 class="mb-1 fw-bold">Proveedores</h5>
+              <p class="text-secondary mb-0 small">Administra contactos.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm stat-card h-100">
+          <div class="card-body d-flex align-items-center gap-3">
+            <span class="stat-icon bg-warning-subtle text-warning"><i class="bi bi-bag-check"></i></span>
+            <div>
+              <h5 class="mb-1 fw-bold">Productos</h5>
+              <p class="text-secondary mb-0 small">CRUD completo.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-            <button type="submit">Agregar</button>
+    <section class="row g-4 mb-4">
+      <div class="col-lg-5">
+        <article class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white border-0 pt-4 px-4">
+            <p class="text-primary text-uppercase fw-bold small mb-1">Módulo</p>
+            <h2 class="h4 fw-bold mb-0"><i class="bi bi-tags me-2"></i>Categorías</h2>
+          </div>
+          <div class="card-body px-4">
+            <form id="categoryForm" class="mb-3">
+              <label for="categoryName" class="form-label fw-semibold">Nombre de categoría</label>
+              <div class="input-group input-box">
+                <input id="categoryName" class="form-control" type="text" placeholder="Ej: Tecnología" />
+                <button class="btn btn-primary" type="submit">Agregar</button>
+              </div>
+            </form>
+            <ul id="categoryList" class="list-group list-group-flush small-list"></ul>
+          </div>
+        </article>
+      </div>
+
+      <div class="col-lg-7">
+        <article class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white border-0 pt-4 px-4">
+            <p class="text-success text-uppercase fw-bold small mb-1">Módulo</p>
+            <h2 class="h4 fw-bold mb-0"><i class="bi bi-truck me-2"></i>Proveedores</h2>
+          </div>
+          <div class="card-body px-4">
+            <form id="supplierForm" class="row g-3 mb-3">
+              <div class="col-md-6 input-box">
+                <label for="supplierName" class="form-label fw-semibold">Nombre</label>
+                <input id="supplierName" class="form-control" type="text" placeholder="Proveedor" />
+              </div>
+              <div class="col-md-6 input-box">
+                <label for="supplierEmail" class="form-label fw-semibold">Correo</label>
+                <input id="supplierEmail" class="form-control" type="email" placeholder="correo@proveedor.com" />
+              </div>
+              <div class="col-12">
+                <button class="btn btn-success w-100" type="submit">Agregar proveedor</button>
+              </div>
+            </form>
+            <ul id="supplierList" class="list-group list-group-flush small-list"></ul>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center gap-3 flex-wrap">
+        <div>
+          <p class="text-warning text-uppercase fw-bold small mb-1">Formulario</p>
+          <h2 id="productFormTitle" class="h4 fw-bold mb-0"><i class="bi bi-bag-plus me-2"></i>Crear producto</h2>
+        </div>
+        <button id="cancelEditBtn" class="btn btn-outline-secondary hidden" type="button">
+          <i class="bi bi-x-circle me-1"></i>Cancelar edición
+        </button>
+      </div>
+
+      <div class="card-body px-4 pb-4">
+        <form id="productForm" class="row g-3">
+          <input type="hidden" id="productId" />
+
+          <div class="col-md-6 input-box">
+            <label for="productName" class="form-label fw-semibold">Producto</label>
+            <input id="productName" class="form-control" type="text" placeholder="Nombre del producto" />
+          </div>
+
+          <div class="col-md-6 input-box">
+            <label for="productPrice" class="form-label fw-semibold">Precio</label>
+            <input id="productPrice" class="form-control" type="number" placeholder="0.00" min="0" step="0.01" />
+          </div>
+
+          <div class="col-md-6 input-box">
+            <label for="productCategory" class="form-label fw-semibold">Categoría</label>
+            <select id="productCategory" class="form-select">
+              <option value="">Seleccione categoría</option>
+            </select>
+          </div>
+
+          <div class="col-md-6 input-box">
+            <label for="productSupplier" class="form-label fw-semibold">Proveedor</label>
+            <select id="productSupplier" class="form-select">
+              <option value="">Seleccione proveedor</option>
+            </select>
+          </div>
+
+          <div class="col-12">
+            <button id="productSubmitBtn" class="btn btn-primary btn-lg w-100" type="submit">
+              <i class="bi bi-save me-2"></i>Guardar producto
+            </button>
           </div>
         </form>
-
-        <ul id="categoryList" class="list scroll-list"></ul>
-      </article>
-
-      <article class="card compact-card">
-        <div class="card-heading">
-          <span class="card-icon">P</span>
-          <div>
-            <p class="label">Módulo</p>
-            <h2>Proveedores</h2>
-          </div>
-        </div>
-
-        <form id="supplierForm">
-          <label for="supplierName">Datos del proveedor</label>
-
-          <div class="input-box">
-            <input id="supplierName" type="text" placeholder="Nombre proveedor" />
-          </div>
-
-          <div class="input-box">
-            <input id="supplierEmail" type="email" placeholder="correo@proveedor.com" />
-          </div>
-
-          <button type="submit">Agregar proveedor</button>
-        </form>
-
-        <ul id="supplierList" class="list scroll-list"></ul>
-      </article>
-
+      </div>
     </section>
 
-    <section class="card featured-card">
-      <div class="section-title">
+    <section class="card border-0 shadow-sm mb-5">
+      <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center gap-3 flex-wrap">
         <div>
-          <p class="label">Formulario</p>
-          <h2 id="productFormTitle">Crear producto</h2>
+          <p class="text-primary text-uppercase fw-bold small mb-1">Inventario</p>
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-table me-2"></i>Productos existentes</h2>
         </div>
-
-        <button id="cancelEditBtn" class="secondary hidden" type="button">
-          Cancelar edición
+        <button id="refreshBtn" class="btn btn-outline-primary" type="button">
+          <i class="bi bi-arrow-clockwise me-1"></i>Actualizar lista
         </button>
       </div>
 
-      <form id="productForm" class="product-form">
-        <input type="hidden" id="productId" />
-
-        <div class="form-control input-box">
-          <label for="productName">Producto</label>
-          <input id="productName" type="text" placeholder="Nombre del producto" />
+      <div class="card-body px-4 pb-4">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Categoría</th>
+                <th>Proveedor</th>
+                <th class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="productTable"></tbody>
+          </table>
         </div>
-
-        <div class="form-control input-box">
-          <label for="productPrice">Precio</label>
-          <input id="productPrice" type="number" placeholder="0.00" min="0" step="0.01" />
-        </div>
-
-        <div class="form-control input-box">
-          <label for="productCategory">Categoría</label>
-          <select id="productCategory">
-            <option value="">Seleccione categoría</option>
-          </select>
-        </div>
-
-        <div class="form-control input-box">
-          <label for="productSupplier">Proveedor</label>
-          <select id="productSupplier">
-            <option value="">Seleccione proveedor</option>
-          </select>
-        </div>
-
-        <button id="productSubmitBtn" class="wide-button" type="submit">
-          Guardar producto
-        </button>
-      </form>
-    </section>
-
-    <section class="card table-card">
-      <div class="section-title">
-        <div>
-          <p class="label">Inventario</p>
-          <h2>Productos existentes</h2>
-        </div>
-
-        <button id="refreshBtn" class="secondary" type="button">
-          Actualizar lista
-        </button>
-      </div>
-
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Producto</th>
-              <th>Precio</th>
-              <th>Categoría</th>
-              <th>Proveedor</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-
-          <tbody id="productTable"></tbody>
-        </table>
       </div>
     </section>
-
   </main>
 
   <script src="validation.js"></script>
   <script src="app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

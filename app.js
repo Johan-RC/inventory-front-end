@@ -1,4 +1,8 @@
-const API_URL = "http://localhost:8080/api";
+// Usa backend local cuando abres con Live Server y backend de Render cuando despliegas el frontend.
+const API_URL =
+  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:8080/api"
+    : "https://inventory-back-end-976w.onrender.com/api";
 
 const categoryForm = document.getElementById("categoryForm");
 const supplierForm = document.getElementById("supplierForm");
@@ -64,7 +68,7 @@ function renderCategories() {
   productCategory.innerHTML = '<option value="">Seleccione categoría</option>';
 
   categories.forEach((category) => {
-    categoryList.innerHTML += `<li>${category.name}</li>`;
+    categoryList.innerHTML += `<li class="list-group-item"><span><i class="bi bi-tag me-2 text-primary"></i>${category.name}</span></li>`;
 
     productCategory.innerHTML += `
       <option value="${category.id}">${category.name}</option>
@@ -78,7 +82,7 @@ function renderSuppliers() {
   productSupplier.innerHTML = '<option value="">Seleccione proveedor</option>';
 
   suppliers.forEach((supplier) => {
-    supplierList.innerHTML += `<li>${supplier.name} - ${supplier.email}</li>`;
+    supplierList.innerHTML += `<li class="list-group-item"><span><i class="bi bi-building me-2 text-success"></i>${supplier.name}</span><span class="badge text-bg-light">${supplier.email}</span></li>`;
 
     productSupplier.innerHTML += `
       <option value="${supplier.id}">${supplier.name}</option>
@@ -90,18 +94,34 @@ function renderSuppliers() {
 function renderProducts() {
   productTable.innerHTML = "";
 
+  if (products.length === 0) {
+    productTable.innerHTML = `
+      <tr>
+        <td colspan="6" class="empty-state">
+          <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+          No hay productos registrados todavía.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
   products.forEach((product) => {
     productTable.innerHTML += `
       <tr>
-        <td>${product.id}</td>
-        <td>${product.name}</td>
+        <td><span class="badge text-bg-secondary">${product.id}</span></td>
+        <td class="fw-semibold">${product.name}</td>
         <td>$${product.price}</td>
-        <td>${product.category.name}</td>
+        <td><span class="badge text-bg-primary">${product.category.name}</span></td>
         <td>${product.supplier.name}</td>
-        <td>
-          <div class="actions">
-            <button class="warning" onclick="editProduct(${product.id})">Editar</button>
-            <button class="danger" onclick="deleteProduct(${product.id})">Eliminar</button>
+        <td class="text-end">
+          <div class="btn-group btn-group-sm" role="group">
+            <button class="btn btn-warning" onclick="editProduct(${product.id})">
+              <i class="bi bi-pencil-square"></i> Editar
+            </button>
+            <button class="btn btn-danger" onclick="deleteProduct(${product.id})">
+              <i class="bi bi-trash"></i> Eliminar
+            </button>
           </div>
         </td>
       </tr>
@@ -177,8 +197,8 @@ function editProduct(id) {
   productCategory.value = product.category.id;
   productSupplier.value = product.supplier.id;
 
-  productFormTitle.textContent = "Actualizar producto";
-  productSubmitBtn.textContent = "Actualizar producto";
+  productFormTitle.innerHTML = `<i class="bi bi-pencil-square me-2"></i>Actualizar producto`;
+  productSubmitBtn.innerHTML = `<i class="bi bi-check-circle me-2"></i>Actualizar producto`;
   cancelEditBtn.classList.remove("hidden");
 
   window.scrollTo({
@@ -206,8 +226,8 @@ async function deleteProduct(id) {
 function resetProductForm() {
   productForm.reset();
   productId.value = "";
-  productFormTitle.textContent = "Crear producto";
-  productSubmitBtn.textContent = "Guardar producto";
+  productFormTitle.innerHTML = `<i class="bi bi-bag-plus me-2"></i>Crear producto`;
+  productSubmitBtn.innerHTML = `<i class="bi bi-save me-2"></i>Guardar producto`;
   cancelEditBtn.classList.add("hidden");
 }
 

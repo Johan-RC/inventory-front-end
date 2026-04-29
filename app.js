@@ -4,20 +4,37 @@ const API_URL =
     ? "http://localhost:8080/api"
     : "https://inventory-back-end-976w.onrender.com/api";
 
+// Formularios
 const categoryForm = document.getElementById("categoryForm");
 const supplierForm = document.getElementById("supplierForm");
 const productForm = document.getElementById("productForm");
 
+// Listas y tabla
 const categoryList = document.getElementById("categoryList");
 const supplierList = document.getElementById("supplierList");
 const productTable = document.getElementById("productTable");
 
+// Campos categoría
+const categoryId = document.getElementById("categoryId");
+const categoryName = document.getElementById("categoryName");
+const categoryFormTitle = document.getElementById("categoryFormTitle");
+const categorySubmitBtn = document.getElementById("categorySubmitBtn");
+const cancelCategoryEditBtn = document.getElementById("cancelCategoryEditBtn");
+
+// Campos proveedor
+const supplierId = document.getElementById("supplierId");
+const supplierName = document.getElementById("supplierName");
+const supplierEmail = document.getElementById("supplierEmail");
+const supplierFormTitle = document.getElementById("supplierFormTitle");
+const supplierSubmitBtn = document.getElementById("supplierSubmitBtn");
+const cancelSupplierEditBtn = document.getElementById("cancelSupplierEditBtn");
+
+// Campos producto
 const productId = document.getElementById("productId");
 const productName = document.getElementById("productName");
 const productPrice = document.getElementById("productPrice");
 const productCategory = document.getElementById("productCategory");
 const productSupplier = document.getElementById("productSupplier");
-
 const productFormTitle = document.getElementById("productFormTitle");
 const productSubmitBtn = document.getElementById("productSubmitBtn");
 const cancelEditBtn = document.getElementById("cancelEditBtn");
@@ -37,7 +54,16 @@ async function request(endpoint, options = {}) {
   });
 
   if (!response.ok) {
-    throw new Error("Error en la petición al backend");
+    let message = "Error en la petición al backend";
+
+    try {
+      const error = await response.json();
+      message = error.message || message;
+    } catch {
+      // Si el backend no devuelve JSON, dejamos el mensaje por defecto.
+    }
+
+    throw new Error(message);
   }
 
   if (response.status === 204) {
@@ -62,13 +88,39 @@ async function loadData() {
   }
 }
 
-// Muestra categorías en lista y en el select de productos
+// Render categorías
 function renderCategories() {
   categoryList.innerHTML = "";
   productCategory.innerHTML = '<option value="">Seleccione categoría</option>';
 
+  if (categories.length === 0) {
+    categoryList.innerHTML = `
+      <div class="empty-state">
+        No hay categorías registradas.
+      </div>
+    `;
+    return;
+  }
+
   categories.forEach((category) => {
-    categoryList.innerHTML += `<li class="list-group-item"><span><i class="bi bi-tag me-2 text-primary"></i>${category.name}</span></li>`;
+    categoryList.innerHTML += `
+      <div class="list-group-item" data-id="${category.id}">
+        <div>
+          <i class="bi bi-tag text-primary me-2"></i>
+          <span>${category.name}</span>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-warning" onclick="editCategory(${category.id})">
+            <i class="bi bi-pencil"></i>
+          </button>
+
+          <button class="btn btn-sm btn-danger" onclick="deleteCategory(${category.id})">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
+    `;
 
     productCategory.innerHTML += `
       <option value="${category.id}">${category.name}</option>
@@ -76,13 +128,40 @@ function renderCategories() {
   });
 }
 
-// Muestra proveedores en lista y en el select de productos
+// Render proveedores
 function renderSuppliers() {
   supplierList.innerHTML = "";
   productSupplier.innerHTML = '<option value="">Seleccione proveedor</option>';
 
+  if (suppliers.length === 0) {
+    supplierList.innerHTML = `
+      <div class="empty-state">
+        No hay proveedores registrados.
+      </div>
+    `;
+    return;
+  }
+
   suppliers.forEach((supplier) => {
-    supplierList.innerHTML += `<li class="list-group-item"><span><i class="bi bi-building me-2 text-success"></i>${supplier.name}</span><span class="badge text-bg-light">${supplier.email}</span></li>`;
+    supplierList.innerHTML += `
+      <div class="list-group-item" data-id="${supplier.id}">
+        <div>
+          <i class="bi bi-building text-success me-2"></i>
+          <span>${supplier.name}</span>
+          <span class="badge text-bg-light ms-2">${supplier.email}</span>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-warning" onclick="editSupplier(${supplier.id})">
+            <i class="bi bi-pencil"></i>
+          </button>
+
+          <button class="btn btn-sm btn-danger" onclick="deleteSupplier(${supplier.id})">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
+    `;
 
     productSupplier.innerHTML += `
       <option value="${supplier.id}">${supplier.name}</option>
@@ -90,7 +169,7 @@ function renderSuppliers() {
   });
 }
 
-// Muestra todos los productos existentes
+// Render productos
 function renderProducts() {
   productTable.innerHTML = "";
 
@@ -98,7 +177,6 @@ function renderProducts() {
     productTable.innerHTML = `
       <tr>
         <td colspan="6" class="empty-state">
-          <i class="bi bi-inbox fs-3 d-block mb-2"></i>
           No hay productos registrados todavía.
         </td>
       </tr>
@@ -109,18 +187,21 @@ function renderProducts() {
   products.forEach((product) => {
     productTable.innerHTML += `
       <tr>
-        <td><span class="badge text-bg-secondary">${product.id}</span></td>
+        <td>${product.id}</td>
         <td class="fw-semibold">${product.name}</td>
         <td>$${product.price}</td>
-        <td><span class="badge text-bg-primary">${product.category.name}</span></td>
+        <td>${product.category.name}</td>
         <td>${product.supplier.name}</td>
-        <td class="text-end">
-          <div class="btn-group btn-group-sm" role="group">
-            <button class="btn btn-warning" onclick="editProduct(${product.id})">
-              <i class="bi bi-pencil-square"></i> Editar
+        <td>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-warning" onclick="editProduct(${product.id})">
+              <i class="bi bi-pencil"></i>
+              Editar
             </button>
-            <button class="btn btn-danger" onclick="deleteProduct(${product.id})">
-              <i class="bi bi-trash"></i> Eliminar
+
+            <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.id})">
+              <i class="bi bi-trash"></i>
+              Eliminar
             </button>
           </div>
         </td>
@@ -129,67 +210,202 @@ function renderProducts() {
   });
 }
 
-// Crear categoría
+// Crear o actualizar categoría
 categoryForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  const name = document.getElementById("categoryName").value;
+  const data = {
+    name: categoryName.value.trim(),
+  };
 
-  await request("/categories", {
-    method: "POST",
-    body: JSON.stringify({ name }),
-  });
+  try {
+    if (categoryId.value) {
+      await request(`/categories/${categoryId.value}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+    } else {
+      await request("/categories", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    }
 
-  categoryForm.reset();
-  await loadData();
+    resetCategoryForm();
+    await loadData();
+  } catch (error) {
+    alert(error.message);
+  }
 });
 
-// Crear proveedor
+// Editar categoría
+function editCategory(id) {
+  const category = categories.find((item) => item.id === id);
+
+  if (!category) {
+    return;
+  }
+
+  categoryId.value = category.id;
+  categoryName.value = category.name;
+
+  categoryFormTitle.innerHTML = `<i class="bi bi-pencil-square me-2"></i>Actualizar categoría`;
+  categorySubmitBtn.innerHTML = "Actualizar";
+  cancelCategoryEditBtn.classList.remove("hidden");
+
+  categoryName.focus();
+}
+
+// Eliminar categoría
+async function deleteCategory(id) {
+  const category = categories.find((item) => item.id === id);
+
+  const confirmDelete = confirm(
+    `¿Seguro que quieres eliminar la categoría "${category?.name}"?\n\nSi tiene productos asociados, el backend puede impedir la eliminación.`
+  );
+
+  if (!confirmDelete) {
+    return;
+  }
+
+  try {
+    await request(`/categories/${id}`, {
+      method: "DELETE",
+    });
+
+    await loadData();
+  } catch (error) {
+    alert("No se pudo eliminar la categoría. Puede tener productos asociados.");
+  }
+}
+
+// Limpiar formulario categoría
+function resetCategoryForm() {
+  categoryForm.reset();
+  categoryId.value = "";
+  categoryFormTitle.innerHTML = `<i class="bi bi-tags me-2"></i>Categorías`;
+  categorySubmitBtn.innerHTML = "Agregar";
+  cancelCategoryEditBtn.classList.add("hidden");
+}
+
+// Crear o actualizar proveedor
 supplierForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  const name = document.getElementById("supplierName").value;
-  const email = document.getElementById("supplierEmail").value;
+  const data = {
+    name: supplierName.value.trim(),
+    email: supplierEmail.value.trim(),
+  };
 
-  await request("/suppliers", {
-    method: "POST",
-    body: JSON.stringify({ name, email }),
-  });
+  try {
+    if (supplierId.value) {
+      await request(`/suppliers/${supplierId.value}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+    } else {
+      await request("/suppliers", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    }
 
-  supplierForm.reset();
-  await loadData();
+    resetSupplierForm();
+    await loadData();
+  } catch (error) {
+    alert(error.message);
+  }
 });
+
+// Editar proveedor
+function editSupplier(id) {
+  const supplier = suppliers.find((item) => item.id === id);
+
+  if (!supplier) {
+    return;
+  }
+
+  supplierId.value = supplier.id;
+  supplierName.value = supplier.name;
+  supplierEmail.value = supplier.email;
+
+  supplierFormTitle.innerHTML = `<i class="bi bi-pencil-square me-2"></i>Actualizar proveedor`;
+  supplierSubmitBtn.innerHTML = "Actualizar proveedor";
+  cancelSupplierEditBtn.classList.remove("hidden");
+
+  supplierName.focus();
+}
+
+// Eliminar proveedor
+async function deleteSupplier(id) {
+  const supplier = suppliers.find((item) => item.id === id);
+
+  const confirmDelete = confirm(
+    `¿Seguro que quieres eliminar el proveedor "${supplier?.name}"?\n\nSi tiene productos asociados, el backend puede impedir la eliminación.`
+  );
+
+  if (!confirmDelete) {
+    return;
+  }
+
+  try {
+    await request(`/suppliers/${id}`, {
+      method: "DELETE",
+    });
+
+    await loadData();
+  } catch (error) {
+    alert("No se pudo eliminar el proveedor. Puede tener productos asociados.");
+  }
+}
+
+// Limpiar formulario proveedor
+function resetSupplierForm() {
+  supplierForm.reset();
+  supplierId.value = "";
+  supplierFormTitle.innerHTML = `<i class="bi bi-truck me-2"></i>Proveedores`;
+  supplierSubmitBtn.innerHTML = "Agregar proveedor";
+  cancelSupplierEditBtn.classList.add("hidden");
+}
 
 // Crear o actualizar producto
 productForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const data = {
-    name: productName.value,
+    name: productName.value.trim(),
     price: Number(productPrice.value),
     categoryId: Number(productCategory.value),
     supplierId: Number(productSupplier.value),
   };
 
-  if (productId.value) {
-    await request(`/products/${productId.value}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    });
-  } else {
-    await request("/products", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-  }
+  try {
+    if (productId.value) {
+      await request(`/products/${productId.value}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+    } else {
+      await request("/products", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    }
 
-  resetProductForm();
-  await loadData();
+    resetProductForm();
+    await loadData();
+  } catch (error) {
+    alert(error.message);
+  }
 });
 
-// Carga un producto en el formulario para editar
+// Editar producto
 function editProduct(id) {
   const product = products.find((item) => item.id === id);
+
+  if (!product) {
+    return;
+  }
 
   productId.value = product.id;
   productName.value = product.name;
@@ -198,40 +414,50 @@ function editProduct(id) {
   productSupplier.value = product.supplier.id;
 
   productFormTitle.innerHTML = `<i class="bi bi-pencil-square me-2"></i>Actualizar producto`;
-  productSubmitBtn.innerHTML = `<i class="bi bi-check-circle me-2"></i>Actualizar producto`;
+  productSubmitBtn.innerHTML = "Actualizar producto";
   cancelEditBtn.classList.remove("hidden");
 
-  window.scrollTo({
-    top: 0,
+  productForm.scrollIntoView({
     behavior: "smooth",
+    block: "center",
   });
 }
 
-// Elimina un producto
+// Eliminar producto
 async function deleteProduct(id) {
-  const confirmDelete = confirm("¿Seguro que quieres eliminar este producto?");
+  const product = products.find((item) => item.id === id);
+
+  const confirmDelete = confirm(`¿Seguro que quieres eliminar el producto "${product?.name}"?`);
 
   if (!confirmDelete) {
     return;
   }
 
-  await request(`/products/${id}`, {
-    method: "DELETE",
-  });
+  try {
+    await request(`/products/${id}`, {
+      method: "DELETE",
+    });
 
-  await loadData();
+    await loadData();
+  } catch (error) {
+    alert(error.message);
+  }
 }
 
-// Limpia el formulario de producto
+// Limpiar formulario producto
 function resetProductForm() {
   productForm.reset();
   productId.value = "";
-  productFormTitle.innerHTML = `<i class="bi bi-bag-plus me-2"></i>Crear producto`;
-  productSubmitBtn.innerHTML = `<i class="bi bi-save me-2"></i>Guardar producto`;
+  productFormTitle.innerHTML = `<i class="bi bi-plus-square me-2"></i>Crear producto`;
+  productSubmitBtn.innerHTML = "Guardar producto";
   cancelEditBtn.classList.add("hidden");
 }
 
+// Botones cancelar y actualizar
+cancelCategoryEditBtn.addEventListener("click", resetCategoryForm);
+cancelSupplierEditBtn.addEventListener("click", resetSupplierForm);
 cancelEditBtn.addEventListener("click", resetProductForm);
 refreshBtn.addEventListener("click", loadData);
 
+// Carga inicial
 loadData();

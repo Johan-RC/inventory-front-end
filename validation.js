@@ -3,6 +3,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const supplierForm = document.getElementById("supplierForm");
   const productForm = document.getElementById("productForm");
 
+  const categoryId = document.getElementById("categoryId");
+  const supplierId = document.getElementById("supplierId");
+
   const categoryName = document.getElementById("categoryName");
   const supplierName = document.getElementById("supplierName");
   const supplierEmail = document.getElementById("supplierEmail");
@@ -39,7 +42,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const contenedor = input.closest(".input-box") || input.parentElement;
     const error = contenedor.querySelector(".error-message");
 
-    if (error) error.remove();
+    if (error) {
+      error.remove();
+    }
   }
 
   function limpiarFormulario(form) {
@@ -49,18 +54,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function obtenerCategoriasActuales() {
-    return Array.from(document.querySelectorAll("#categoryList li"))
-      .map((li) => li.textContent.trim())
-      .filter(Boolean);
+    return Array.from(document.querySelectorAll("#categoryList .list-group-item"))
+      .map((item) => ({
+        id: item.dataset.id,
+        name: item.querySelector("span")?.textContent.trim() || "",
+      }))
+      .filter((item) => item.name);
   }
 
-  function obtenerCorreosActuales() {
-    return Array.from(document.querySelectorAll("#supplierList li"))
-      .map((li) => {
-        const texto = li.textContent.trim();
-        return texto.includes("-") ? texto.split("-").pop().trim() : "";
-      })
-      .filter(Boolean);
+  function obtenerProveedoresActuales() {
+    return Array.from(document.querySelectorAll("#supplierList .list-group-item"))
+      .map((item) => ({
+        id: item.dataset.id,
+        email: item.querySelector(".badge")?.textContent.trim() || "",
+      }))
+      .filter((item) => item.email);
   }
 
   categoryForm.addEventListener(
@@ -85,9 +93,10 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const existe = categorias.some(
-        (categoria) => normalizar(categoria) === normalizar(nombre)
-      );
+      const existe = categorias.some((categoria) => {
+        const mismaCategoria = String(categoria.id) === String(categoryId.value);
+        return !mismaCategoria && normalizar(categoria.name) === normalizar(nombre);
+      });
 
       if (existe) {
         event.preventDefault();
@@ -105,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const nombre = supplierName.value.trim();
       const email = supplierEmail.value.trim();
-      const correos = obtenerCorreosActuales();
+      const proveedores = obtenerProveedoresActuales();
 
       if (!nombre) {
         event.preventDefault();
@@ -135,9 +144,10 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const existe = correos.some(
-        (correo) => normalizar(correo) === normalizar(email)
-      );
+      const existe = proveedores.some((proveedor) => {
+        const mismoProveedor = String(proveedor.id) === String(supplierId.value);
+        return !mismoProveedor && normalizar(proveedor.email) === normalizar(email);
+      });
 
       if (existe) {
         event.preventDefault();
